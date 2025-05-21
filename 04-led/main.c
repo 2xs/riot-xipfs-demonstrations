@@ -81,7 +81,7 @@ led_on(int led)
         return;
     }
 
-    if (set_led(led, LED_STATUS_ON) != 0) {
+    if (set_led(led, LED_STATUS_ON) <= 0) {
         printf("failed to set led status\n");
     }
 }
@@ -103,7 +103,7 @@ led_off(int led)
         return;
     }
 
-    if (set_led(led, LED_STATUS_OFF) != 0) {
+    if (set_led(led, LED_STATUS_OFF) <= 0) {
         printf("failed to set led status\n");
     }
 }

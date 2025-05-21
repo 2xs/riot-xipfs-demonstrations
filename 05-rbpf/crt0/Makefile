@@ -38,37 +38,43 @@ LD      := $(PREFIX)ld
 OBJCOPY := $(PREFIX)objcopy
 RM      := rm
 
-CFLAGS    = -Wall
-CFLAGS   += -Wextra
-CFLAGS   += -Werror
-CFLAGS   += -mthumb
-CFLAGS   += -mcpu=cortex-m4
-CFLAGS   += -ffreestanding
-# Prevent GCC from generating code that uses the PIC
-# register.
-CFLAGS   += -ffixed-sl
-CFLAGS   += -Os
-CFLAGS   += -g3
-CFLAGS   += -ggdb
+CFLAGS          = -Wall
+CFLAGS         += -Wextra
+CFLAGS         += -Werror
+CFLAGS         += -mthumb
+CFLAGS         += -mcpu=cortex-m4
+CFLAGS         += -ffreestanding
+ifdef DEBUG
+CFLAGS         += -Og
+CFLAGS         += -ggdb
+else
+CFLAGS         += -Os
+endif
 
-all: crt0.bin
+LDFLAGS         = -Tlink.ld
 
-crt0.bin: crt0.elf
-	$(OBJCOPY)\
-          --input-target=elf32-littlearm\
-          --output-target=binary\
-        $< $@
+OBJCOPYFLAGS    = --input-target=elf32-littlearm
+OBJCOPYFLAGS   += --output-target=binary
 
-crt0.elf: crt0.o
-	$(LD) -T link.ld $< -o $@
+all: ../build/crt0.fae
 
-crt0.o: crt0.c
+../build:
+	mkdir -p ../build
+
+../build/crt0.fae: ../build/crt0.elf
+	$(OBJCOPY) $(OBJCOPYFLAGS) $< $@
+	@chmod 644 $@
+
+../build/crt0.elf: ../build/crt0.o link.ld
+	$(LD) $(LDFLAGS) $< -o $@
+
+../build/crt0.o: crt0.c | ../build
 	$(CC) $(CFLAGS) -c $< -o $@
 
 realclean: clean
-	$(RM) -f crt0.elf crt0.bin
+	$(RM) -f ../build/crt0.fae ../build/crt0.elf
 
 clean:
-	$(RM) -f crt0.o
+	$(RM) -f ../build/crt0.o
 
 .PHONY: all realclean clean

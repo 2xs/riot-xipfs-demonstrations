@@ -7,7 +7,6 @@
 PREFIX          = arm-none-eabi-
 CC              = $(PREFIX)gcc
 LD              = $(PREFIX)gcc
-OBJCOPY         = $(PREFIX)objcopy
 
 CFLAGS          = -Wall
 CFLAGS         += -Wextra
@@ -43,65 +42,32 @@ ifeq ($(shell $(PREFIX)ld --help | grep -q 'warn-rwx-segments'; echo $$?), 0)
 LDFLAGS        += -Wl,--no-warn-rwx-segments
 endif
 
-OBJCOPYFLAGS    = --input-target=elf32-littlearm
-OBJCOPYFLAGS   += --output-target=binary
 
 TARGET          = dump
 
-all: $(TARGET).bin gdbinit
+all: build/$(TARGET).fae
 
-$(TARGET).bin: $(TARGET)-raw.bin padding.bin
-	cat $^ > $@
+build :
+	mkdir -p build
 
-$(TARGET)-raw.bin: crt0.bin symbols.bin relocation.bin partition.bin
-	cat $^ > $@
-
-crt0.bin: crt0/crt0.c crt0/link.ld crt0/Makefile
-	make -C crt0 realclean all
-	cp crt0/$@ $@
-
-symbols.bin: $(TARGET).elf scripts/symbols.py
-	exec scripts/symbols.py $< $@
-
-relocation.bin: $(TARGET).elf scripts/relocation.py
-	exec scripts/relocation.py $< $@
-
-partition.bin: $(TARGET).elf
-	$(OBJCOPY) $(OBJCOPYFLAGS) $< $@
+build/$(TARGET).fae: build/$(TARGET).elf
+	./fae_utils/build_fae.py $<
 	@chmod 644 $@
 
-$(TARGET).elf: main.o stdriot/stdriot.o
+build/$(TARGET).elf: build/main.o build/stdriot.o
 	$(LD) $(LDFLAGS) $^ -o $@
 
-stdriot/stdriot.o: stdriot/stdriot.c
+build/stdriot.o: stdriot/stdriot.c stdriot/stdriot.h | build
 	$(CC) $(CFLAGS) -c $< -o $@
 
-main.o: main.c
+build/main.o: main.c | build
 	$(CC) $(CFLAGS) -c $< -o $@
-
-padding.bin: $(TARGET)-raw.bin scripts/padding.py
-	exec scripts/padding.py $< $@
-
-gdbinit: scripts/gdbinit.py crt0/crt0.elf $(TARGET).bin crt0.bin symbols.bin relocation.bin
-	exec scripts/gdbinit.py\
-            $(shell realpath crt0/crt0.elf)\
-            $(shell realpath $(TARGET).elf)\
-            $$(($$(wc -c < crt0.bin)+$$(wc -c < symbols.bin)+$$(wc -c < relocation.bin))) > $@
 
 clean:
-	$(RM)\
-            main.o\
-            stdriot/stdriot.o\
-            $(TARGET)-raw.bin\
-            padding.bin\
-            crt0.bin\
-            symbols.bin\
-            relocation.bin\
-            partition.bin
+	$(RM) build/main.o build/stdriot.o
 	make -C crt0 clean
 
 realclean: clean
-	$(RM) $(TARGET).elf $(TARGET).bin gdbinit
-	make -C crt0 realclean
+	$(RM) -rf build
 
 .PHONY: all clean realclean

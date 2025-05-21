@@ -41,7 +41,7 @@
 #include "shared.h"
 #include "stdriot.h"
 
-#define PROGNAME "rbpf.bin"
+#define PROGNAME "rbpf.fae"
 
 #define RBPF_STACK_SIZE   (512)
 #define BYTECODE_SIZE_MAX (600)
@@ -67,7 +67,7 @@ bpf_print_result(int64_t result, int status)
 {
     switch (status) {
     case RBPF_OK:
-        printf(PROGNAME": %lx\n", (uint32_t)result);
+        printf(PROGNAME": %lu\n", (uint32_t)result);
         return 0;
         break;
     case RBPF_ILLEGAL_MEM:
@@ -169,7 +169,7 @@ main(int argc, char **argv)
         return bpf_run_with_file(&rbpf, RUN_ONCE, buf, (size_t)result);
     }
 
-    integer = (uint64_t)strtol(argv[2], &endptr, 16);
+    integer = (uint64_t)strtol(argv[2], &endptr, 10);
     if (argv[2] != endptr && *endptr == '\0') {
         return bpf_run_with_integer(&rbpf, RUN_ONCE, integer);
     }

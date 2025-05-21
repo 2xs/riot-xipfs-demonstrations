@@ -49,71 +49,46 @@ endif
 OBJCOPYFLAGS    = --input-target=elf32-littlearm
 OBJCOPYFLAGS   += --output-target=binary
 
-TARGET          = rbpf-unsafe-bench
+TARGET          = rbpf-bench-unsafe
+
+BUILD_DIRECTORY = build
 
 C_SOURCES       = main.c
 C_SOURCES      += $(shell find src stdriot -type f -name '*.c')
 S_SOURCES       = $(shell find src stdriot -type f -name '*.S')
 
-C_OBJECTS       = $(C_SOURCES:.c=.o)
-S_OBJECTS       = $(S_SOURCES:.S=.o)
+C_OBJECTS       = $(addprefix $(BUILD_DIRECTORY)/, $(C_SOURCES:.c=.o))
+S_OBJECTS       = $(addprefix $(BUILD_DIRECTORY)/, $(S_SOURCES:.S=.o))
 
-all: $(TARGET).bin gdbinit
+$(info $(C_OBJECTS))
 
-$(TARGET).bin: $(TARGET)-raw.bin padding.bin
-	cat $^ > $@
+all: $(BUILD_DIRECTORY)/$(TARGET).fae
 
-$(TARGET)-raw.bin: crt0.bin symbols.bin relocation.bin partition.bin
-	cat $^ > $@
+$(BUILD_DIRECTORY):
+	mkdir -p ${BUILD_DIRECTORY}
 
-crt0.bin: crt0/crt0.c crt0/link.ld crt0/Makefile
-	make -C crt0 realclean all
-	cp crt0/$@ $@
-
-symbols.bin: $(TARGET).elf scripts/symbols.py
-	exec scripts/symbols.py $< $@
-
-relocation.bin: $(TARGET).elf scripts/relocation.py
-	exec scripts/relocation.py $< $@
-
-partition.bin: $(TARGET).elf
-	$(OBJCOPY) $(OBJCOPYFLAGS) $< $@
+$(BUILD_DIRECTORY)/$(TARGET).fae: $(BUILD_DIRECTORY)/$(TARGET).elf
+	./fae_utils/build_fae.py $<
 	@chmod 644 $@
 
-$(TARGET).elf: $(C_OBJECTS) $(S_OBJECTS)
+$(BUILD_DIRECTORY)/$(TARGET).elf: $(C_OBJECTS) $(S_OBJECTS)
 	$(LD) $(LDFLAGS) $^ -o $@
 
-%.o: %.c
+$(BUILD_DIRECTORY)/%.o: %.c | $(BUILD_DIRECTORY)
+	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-%.o: %.S
+$(BUILD_DIRECTORY)/%.o: %.S | $(BUILD_DIRECTORY)
+	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
-
-padding.bin: $(TARGET)-raw.bin scripts/padding.py
-	exec scripts/padding.py $< $@
-
-gdbinit: scripts/gdbinit.py crt0/crt0.elf $(TARGET).bin crt0.bin symbols.bin relocation.bin
-	exec scripts/gdbinit.py\
-            $(shell realpath crt0/crt0.elf)\
-            $(shell realpath $(TARGET).elf)\
-            $$(($$(wc -c < crt0.bin)+$$(wc -c < symbols.bin)+$$(wc -c < relocation.bin))) > $@
 
 clean:
 	$(RM)\
-            main.o\
-            stdriot/stdriot.o\
-            $(TARGET)-raw.bin\
-            padding.bin\
-            crt0.bin\
-            symbols.bin\
-            relocation.bin\
-            partition.bin\
             $(C_OBJECTS)\
             $(S_OBJECTS)
 	make -C crt0 clean
 
 realclean: clean
-	$(RM) $(TARGET).elf $(TARGET).bin gdbinit
-	make -C crt0 realclean
+	$(RM) -rf $(BUILD_DIRECTORY)
 
 .PHONY: all clean realclean

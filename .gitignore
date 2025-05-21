@@ -3,3 +3,5 @@ gdbinit
 *.elf
 *.bin
 *.o
+build/
+*.rbpf
