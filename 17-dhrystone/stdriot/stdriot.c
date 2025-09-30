@@ -98,6 +98,33 @@ typedef int (*xipfs_syscall_exit_t)(int status);
 /**
  * @internal
  *
+ * @def XIPFS_FREE_RAM_SIZE
+ *
+ * @brief Amount of free RAM available for the relocatable
+ * binary to use
+ *
+ * @warning Must be synchronized with xipfs' one
+ *
+ * @see xipfs/src/file.c
+ */
+#define XIPFS_FREE_RAM_SIZE 4096
+
+/**
+ * @internal
+ *
+ * @def EXEC_STACKSIZE_DEFAULT
+ *
+ * @brief The default execution stack size of the binary
+ *
+ * @warning Must be synchronized with xipfs' one
+ *
+ * @see xipfs/src/file.c
+ */
+#define EXEC_STACKSIZE_DEFAULT 1024
+
+/**
+ * @internal
+ *
  * @def XIPFS_EXEC_ARGC_MAX
  *
  * @brief The maximum number of arguments to pass to the binary
@@ -160,7 +187,6 @@ typedef int (*xipfs_syscall_exit_t)(int status);
  *
  * @see sys/fs/xipfs/file.c
  * @warning MUST REMAIN SYNCHRONIZED with xipfs's file.c.
- * @warning MUST REMAIN SYNCHRONIZED with crt0's definition.
  */
 typedef struct crt0_ctx_s {
     /**
@@ -189,7 +215,7 @@ typedef struct crt0_ctx_s {
      */
     void *file_base;
     /**
-     * true if the context is executed in user mode with configured MPU regions,
+     * true if the context is executed in user mode with MPU regions configured,
      * false otherwise
      */
     unsigned char is_safe_call;

@@ -344,7 +344,26 @@ int rbpf_engine_run(rbpf_application_t *rbpf, const void *ctx, int64_t *result)
     int res = RBPF_OK;
 
     rbpf->branches_remaining = RBPF_BRANCHES_ALLOWED;
-    uint64_t regmap[11] = { 0 };
+    /*
+     * This expression is commented because it makes the compiler generates a memset call,
+     * which would be triggering either a direct call to RIOT's memset or a syscall to it.
+     * It can badly damage the performance and introduce false results.
+     *
+     * uint64_t regmap[11] = { 0 };
+     */
+    uint64_t regmap[11];
+
+    regmap[0] = 0;
+    regmap[1] = (uint64_t)(uintptr_t)ctx;
+    regmap[2] = 0;
+    regmap[3] = 0;
+    regmap[4] = 0;
+    regmap[5] = 0;
+    regmap[6] = 0;
+    regmap[7] = 0;
+    regmap[8] = 0;
+    regmap[9] = 0;
+    regmap[10] = (uint64_t)(uintptr_t)(rbpf->stack + RBPF_STACK_SIZE);
 
     regmap[1] = (uint64_t)(uintptr_t)ctx;
     regmap[10] = (uint64_t)(uintptr_t)(rbpf->stack + RBPF_STACK_SIZE);

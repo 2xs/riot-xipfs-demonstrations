@@ -60,8 +60,6 @@ S_SOURCES       = $(shell find src stdriot -type f -name '*.S')
 C_OBJECTS       = $(addprefix $(BUILD_DIRECTORY)/, $(C_SOURCES:.c=.o))
 S_OBJECTS       = $(addprefix $(BUILD_DIRECTORY)/, $(S_SOURCES:.S=.o))
 
-$(info $(C_OBJECTS))
-
 all: $(BUILD_DIRECTORY)/$(TARGET).fae
 
 $(BUILD_DIRECTORY):

@@ -192,7 +192,7 @@ typedef struct bench_case_info_s {
     .help_arguments = bench_case_help_arguments \
 }
 
-#define DIRECTORY    "/dev/nvme0p0/"
+#define DIRECTORY    "/dev/nvme0p1/"
 
 static const bench_case_info_t bench_case_infos[BENCH_CASES_COUNT] = {
     [       BENCH_CASE_INCR] = BENCH_CASE_INFO_INIT("incr", DIRECTORY "incr.rbpf", "uint32_t"),

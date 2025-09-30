@@ -29,9 +29,6 @@ CFLAGS         += -Os
 endif
 CFLAGS         += -Wno-unused-parameter
 CFLAGS         += -Istdriot
-CFLAGS         += -Isrc/RIOT/sys/include
-CFLAGS         += -Isrc/RIOT/sys/include/rbpf
-CFLAGS         += -Isrc/RIOT/core/lib/include
 
 LDFLAGS         = -nostartfiles
 LDFLAGS        += -nodefaultlibs
@@ -49,16 +46,14 @@ endif
 OBJCOPYFLAGS    = --input-target=elf32-littlearm
 OBJCOPYFLAGS   += --output-target=binary
 
-TARGET          = rbpf-bench-unsafe
+TARGET          = dhrystone
 
 BUILD_DIRECTORY = build
 
-C_SOURCES       = main.c
-C_SOURCES      += $(shell find src stdriot -type f -name '*.c')
-S_SOURCES       = $(shell find src stdriot -type f -name '*.S')
+C_SOURCES       = main.c dhry21b.c utils.c
+C_SOURCES      += $(shell find stdriot -type f -name '*.c')
 
 C_OBJECTS       = $(addprefix $(BUILD_DIRECTORY)/, $(C_SOURCES:.c=.o))
-S_OBJECTS       = $(addprefix $(BUILD_DIRECTORY)/, $(S_SOURCES:.S=.o))
 
 all: $(BUILD_DIRECTORY)/$(TARGET).fae
 
