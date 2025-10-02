@@ -157,7 +157,7 @@ typedef struct bench_case_info_s {
     .help_arguments = bench_case_help_arguments \
 }
 
-#define DIRECTORY    "/dev/nvme0p1/"
+#define DIRECTORY    "/nvme0p1/"
 
 static const bench_case_info_t bench_case_infos[BENCH_CASES_COUNT] = {
     [       BENCH_CASE_INCR] = BENCH_CASE_INFO_INIT("incr", DIRECTORY "incr.rbpf", "uint32_t"),
@@ -321,7 +321,7 @@ static int bpf_run_memcpy(rbpf_application_t *rbpf, unsigned n, int argc, const 
         return 1;
     }
 
-#define MEMCPY_DATA_FILENAME "/dev/nvme0p0/memcpy_data.dta"
+#define MEMCPY_DATA_FILENAME "/nvme0p1/memcpy_data.dta"
     int data_loading_result = bpf_load_file_to_buffer(MEMCPY_DATA_FILENAME);
     if (data_loading_result < 0)
         return 1;
@@ -356,7 +356,7 @@ static int bpf_run_bubble_sort(rbpf_application_t *rbpf,unsigned n, int argc, co
         return 1;
     }
 
-#define BSORT_DATA_FILENAME "/dev/nvme0p0/bsort_data.dta"
+#define BSORT_DATA_FILENAME "/nvme0p1/bsort_data.dta"
     int data_loading_result = bpf_load_file_to_buffer(BSORT_DATA_FILENAME);
     if (data_loading_result < 0)
         return 1;
