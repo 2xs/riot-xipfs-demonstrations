@@ -33,8 +33,7 @@
 
 #include "stdriot.h"
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     int temp = get_temp();
 
