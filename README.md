@@ -30,10 +30,11 @@ For further details and in-deep coverage of FAE format, you can also read the [R
 
 ## directories.mk file.
 
-To produce FAE files, XiPFS demonstrations needs to know the location of FAE format directory in the host filesystem.  
+To produce FAE files, XiPFS demonstrations need to know the location of FAE format directory in the host filesystem.  
 At the root of XiPFS demonstrations folder, please create a `directories.mk` file next to existing `vars.mk` file.  
 Edit this file to provide the expected Makefile variable `FAE_DIRECTORY_PATH` with the actual FAE format path in the filesystem.
 
+For example :  
 ```
 $ ls
 fae_format riot_xipfs_demonstrations
